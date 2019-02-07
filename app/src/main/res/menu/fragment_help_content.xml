@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/actionDeleteAnimal"
+        android:icon="@drawable/ic_delete_pet"
+        android:title="@string/eliminar"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/actionShareAnimal"
+        android:icon="@drawable/ic_action_share"
+        android:title="@string/compartir"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/actionPhotoAnimal"
+        android:icon="@drawable/ic_take_photo"
+        android:title="@string/tomar_foto"
+        app:showAsAction="ifRoom" />
+
+</menu>
