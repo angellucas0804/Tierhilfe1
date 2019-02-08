@@ -29,7 +29,7 @@ public class Animal {
 
     private final long creationTimestamp;
 
-    public Animal(@NonNull String id, @NonNull String name, @NonNull String description, @NonNull String latitud, @NonNull String longitud, @NonNull String address, @NonNull String image, @NonNull int phone, long creationTimestamp) {
+    public Animal(@NonNull String id, @NonNull String name, @NonNull String description, @NonNull String latitud, @NonNull String longitud, @NonNull String address, @NonNull String image, int phone, long creationTimestamp) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -41,7 +41,7 @@ public class Animal {
         this.creationTimestamp = creationTimestamp;
     }
 
-    public Animal(@NonNull String name, @NonNull String description, @NonNull String latitud, @NonNull String longitud, @NonNull String address, @NonNull String image, @NonNull int phone, long creationTimestamp) {
+    public Animal(@NonNull String name, @NonNull String description, @NonNull String latitud, @NonNull String longitud, @NonNull String address, @NonNull String image, int phone, long creationTimestamp) {
         this.id = "";
         this.name = name;
         this.description = description;
