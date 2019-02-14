@@ -49,6 +49,7 @@
             android:id="@+id/cv_ubication"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:alpha="0.85"
             app:cardCornerRadius="10dp"
             app:cardElevation="@dimen/cardview_default_elevation"
@@ -82,19 +83,31 @@
 
         </android.support.v7.widget.CardView>
 
-        <ImageView
-            android:id="@+id/iv_animal"
+        <LinearLayout
+            android:id="@+id/ll_animal"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="250dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
+            android:background="@drawable/border"
+            android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cv_ubication"
-            tools:ignore="ContentDescription"
-            android:scaleType="fitXY"
-            tools:src="@drawable/ic_launcher_background"/>
+            app:layout_constraintTop_toBottomOf="@+id/cv_ubication">
+
+
+            <ImageView
+                android:id="@+id/iv_animal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:src="@drawable/blank_image"
+                tools:ignore="ContentDescription" />
+
+
+        </LinearLayout>
+
 
         <EditText
             android:id="@+id/et_animal_description"
@@ -110,18 +123,19 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_animal"
-            tools:text = "sadasdasdasdasdasdasdasdasdasdasdasdasdasdsadasd"
-            tools:ignore="Autofill" />
+            app:layout_constraintTop_toBottomOf="@+id/ll_animal"
+            tools:ignore="Autofill"
+            tools:text="sadasdasdasdasdasdasdasdasdasdasdasdasdasdsadasd" />
 
         <Button
             android:id="@+id/btn_go_rout"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
-            android:text="ir por la mascota"
+            android:text="IR POR LA MASCOTA"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/et_animal_description" />

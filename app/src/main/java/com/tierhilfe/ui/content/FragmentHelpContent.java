@@ -11,8 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.ShareCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
 import android.util.Log;
@@ -31,12 +28,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
@@ -45,6 +42,7 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.tierhilfe.R;
 import com.tierhilfe.domain.Animal;
 import com.tierhilfe.ui.FragmentBase;
+import com.tierhilfe.ui.list.FragmentHelpList;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -53,7 +51,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 public class FragmentHelpContent extends FragmentBase {
@@ -130,10 +127,30 @@ public class FragmentHelpContent extends FragmentBase {
                 takePhoto();
                 break;
             case R.id.actionShareAnimal:
-                shareInformation();
+                if (validateShare()) {
+                    shareInformation();
+                }
                 break;
         }
         return false;
+    }
+
+    public boolean validateShare() {
+        if (et_animal_name.getText().toString().isEmpty()) {
+            Toast.makeText(getContext(), "Falta nombre de la mascota", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (et_animal_description.getText().toString().isEmpty()) {
+            Toast.makeText(getContext(), "Falta la descripción.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (bitmapString.isEmpty()) {
+            Toast.makeText(getContext(), "Falta imagen.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     @Nullable
@@ -169,6 +186,20 @@ public class FragmentHelpContent extends FragmentBase {
     }
 
     private void updateAnimal() {
+        int phone;
+        if (et_owner_phone.getText().toString().isEmpty()) {
+            phone = 0;
+        } else {
+            phone = Integer.parseInt(et_owner_phone.getText().toString());
+        }
+
+        String image;
+        if (bitmapString.isEmpty()) {
+            image = FragmentHelpList.PHOTO_EMPTY;
+        } else {
+            image = bitmapString;
+        }
+
         final Animal animal = new Animal(
                 animalId,
                 et_animal_name.getText().toString(),
@@ -176,8 +207,8 @@ public class FragmentHelpContent extends FragmentBase {
                 latitud,
                 longitud,
                 tv_animal_address.getText().toString(),
-                bitmapString,
-                Integer.parseInt(et_owner_phone.getText().toString()),
+                image,
+                phone,
                 System.currentTimeMillis()
         );
         viewModelContent.updateAnimal(animal);
@@ -192,10 +223,19 @@ public class FragmentHelpContent extends FragmentBase {
         fragmentInteractionInterface.setTitle(dateFormat.format(animalDate));
         et_animal_name.setText(animal.getName());
         et_animal_description.setText(animal.getDescription());
-        et_owner_phone.setText(String.valueOf(animal.getPhone()));
 
-        bitmapString = animal.getImage();
-        iv_animal.setImageBitmap(StringToBitMap(animal.getImage()));
+        if (animal.getPhone() == 0) {
+            et_owner_phone.setText("");
+        } else {
+            et_owner_phone.setText(String.valueOf(animal.getPhone()));
+        }
+
+        if (animal.getImage().equals(FragmentHelpList.PHOTO_EMPTY)) {
+            Glide.with(Objects.requireNonNull(getContext())).load(FragmentHelpList.PHOTO_EMPTY).into(iv_animal);
+        } else {
+            bitmapString = animal.getImage();
+            iv_animal.setImageBitmap(StringToBitMap(animal.getImage()));
+        }
 
         latitud = String.valueOf(animal.getLatitud());
         longitud = String.valueOf(animal.getLongitud());
@@ -374,13 +414,11 @@ public class FragmentHelpContent extends FragmentBase {
     }
 
     //COMPARTIR
-
     private void shareInformation() {
         Uri imageUri = getLocalBitmapUri(StringToBitMap(bitmapString));
-
         String shareMessage = "Hola, mi nombre es "
                 + et_animal_name.getText().toString()
-                + " :\n" + et_animal_description.getText()
+                + " :\n" + et_animal_description.getText().toString()
                 + "\n" + "Aqui te dejo mis datos: \n" + "Teléfono: "
                 + et_owner_phone.getText().toString() + "\n"
                 + "Dirección: " + tv_animal_address.getText().toString();
@@ -419,21 +457,27 @@ public class FragmentHelpContent extends FragmentBase {
 
     //ROUTE
     private void popUpRoute() {
-        @SuppressLint("InflateParams") View view = LayoutInflater.from(getContext()).inflate(R.layout.popup_route, null);
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
-        dialog.setView(view);
-        final ImageView iv_waze = view.findViewById(R.id.iv_waze);
-        final ImageView iv_gmaps = view.findViewById(R.id.iv_gmaps);
-        dialog.create();
-        final AlertDialog ad = dialog.show();
-        iv_waze.setOnClickListener(view12 -> {
-            ad.dismiss();
-            startWaze();
-        });
-        iv_gmaps.setOnClickListener(view1 -> {
-            ad.dismiss();
-            startGmaps();
-        });
+        if (!latitud.isEmpty()) {
+            @SuppressLint("InflateParams") View view = LayoutInflater.from(getContext()).inflate(R.layout.popup_route, null);
+            final AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+            dialog.setView(view);
+            final ImageView iv_waze = view.findViewById(R.id.iv_waze);
+            final ImageView iv_gmaps = view.findViewById(R.id.iv_gmaps);
+            dialog.create();
+            final AlertDialog ad = dialog.show();
+            iv_waze.setOnClickListener(view12 -> {
+                ad.dismiss();
+                startWaze();
+            });
+            iv_gmaps.setOnClickListener(view1 -> {
+                ad.dismiss();
+                startGmaps();
+            });
+        } else {
+            Toast.makeText(getContext(), "Falta completar la dirección.", Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 
     private void startGmaps() {

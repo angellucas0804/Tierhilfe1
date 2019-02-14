@@ -20,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.tierhilfe.ImageDogsActivity;
 import com.tierhilfe.R;
 import com.tierhilfe.domain.Animal;
 import com.tierhilfe.ui.FragmentBase;
@@ -29,7 +31,7 @@ import java.util.List;
 
 public class FragmentHelpList extends FragmentBase {
 
-    public static final String TAG = "ListFragment";
+    public static final String PHOTO_EMPTY = "https://www.solac.com/images/blank_product.png";
 
     private ArrayAdapter<Animal> animalArrayAdapter;
     private ViewModelHelpList viewModelList;
@@ -86,10 +88,10 @@ public class FragmentHelpList extends FragmentBase {
         viewModelList.getCreateAnimalResponse()
                 .observe(this, animal -> {
                     if (animal == null) {
-                        Log.d("FragmentList", "note == null");
+                        Log.d("FragmentList", "animal == null");
                         return;
                     }
-                    Log.d("FragmentList", "note != null");
+                    Log.d("FragmentList", "animal != null");
                     onAnimalCreated(animal);
                     viewModelList
                             .getCreateAnimalResponse()
@@ -115,7 +117,7 @@ public class FragmentHelpList extends FragmentBase {
 
     private void createAnimal() {
         final long creationTimestamp = System.currentTimeMillis();
-        viewModelList.createAnimal("", "", "", "", "", "", 0, creationTimestamp);
+        viewModelList.createAnimal("", "", "", "", "", PHOTO_EMPTY, 0, creationTimestamp);
     }
 
     private static class AnimalAdapter extends ArrayAdapter<Animal> {
@@ -148,17 +150,23 @@ public class FragmentHelpList extends FragmentBase {
                 view = convertView;
                 viewHolder = (ViewHolder) convertView.getTag();
             }
+
             String animalTitle = animal.getName();
             if (animalTitle.trim().length() == 0) {
                 animalTitle = getContext().getString(R.string.no_hay);
             }
             viewHolder.tv_element_name.setText(animalTitle);
 
-            Bitmap bitmap = StringToBitMap(animal.getImage());
-            if (bitmap != null){
-                bitmap = scaleDown(bitmap,1024,true);
+            if (animal.getImage().equals(PHOTO_EMPTY)) {
+                Glide.with(getContext()).load(PHOTO_EMPTY).into(viewHolder.iv_element_animal);
+            } else {
+                Bitmap bitmap = StringToBitMap(animal.getImage());
+                if (bitmap != null) {
+                    bitmap = scaleDown(bitmap, 1024, true);
+                }
+                viewHolder.iv_element_animal.setImageBitmap(bitmap);
             }
-            viewHolder.iv_element_animal.setImageBitmap(bitmap);
+
 
             return view;
         }
